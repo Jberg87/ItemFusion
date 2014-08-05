@@ -22,7 +22,7 @@ public class ItemFusionStart {
         System.out.println();
         int sumOfPurchases = item.getBestOption();
         System.out.println("-----------------------------");
-        System.out.println("Sum of the purchases: ~ " + sumOfPurchases);
+        System.out.println("Sum: ~ " + sumOfPurchases);
         System.out.println();
         item.printTreeBestOptionB("");
     }
