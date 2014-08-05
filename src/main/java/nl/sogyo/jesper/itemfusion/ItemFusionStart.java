@@ -6,51 +6,64 @@ package nl.sogyo.jesper.itemfusion;
 public class ItemFusionStart {
 
     public static void main(String[] args) {
-
         GameDEUS myDEUS = new GameDEUS();
         importGame(myDEUS);
 
-        // generate prices for all items if available in store
-//        for (int i = 0; i < myDEUS.itemList.size(); i++) {
-//            if (myDEUS.itemList.get(i).getStoreList().size() > 0) {
-//                myDEUS.itemList.get(i).setLowestCostStoreAndPrice();
-//            }
-//        }
-
         // generate random item to check for
-        int testItemNum = 105; //(int) (Math.random()*myDEUS.itemList.size());
-
-        printItemOverview(myDEUS, testItemNum);
+        int testItemNum = (int) (Math.random()*myDEUS.itemList.size());
+        Item item = myDEUS.getItemList().get(testItemNum);
+//        printItemOverview(myDEUS, testItemNum);
 
         System.out.println();
-        System.out.println("Lowest price for " + myDEUS.itemList.get(testItemNum).getName() + ": ");
+        System.out.println("Lowest price for " + item.getName() + ": ");
+        item.calculateLowestCost();
+//        bulkCheckPrices(myDEUS, testItemNum);
 
-        int lowestItemPrice = myDEUS.itemList.get(testItemNum).getLowestPrice();
-        System.out.println(" ~ " + lowestItemPrice);
-
-        myDEUS.itemList.get(testItemNum).getBestOption();
         System.out.println();
-        myDEUS.itemList.get(testItemNum).printTreeBestOptionB("");
+        int sumOfPurchases = item.getBestOption();
+        System.out.println("-----------------------------");
+        System.out.println("Sum of the purchases: ~ " + sumOfPurchases);
+        System.out.println();
+        item.printTreeBestOptionB("");
+    }
 
-        for (int i = 0; i < myDEUS.itemList.size(); i++)
-        System.out.println(myDEUS.itemList.get(i).getFusionList().size());
+    private static void bulkCheckPrices(GameDEUS myDEUS, int testItemNum) {
+        for (int i = 0; i < myDEUS.getItemList().size(); i++){
+            Item item = myDEUS.getItemList().get(i);
+            item.calculateLowestCost();
+            item.unlock();
+        }
+        System.out.println("lowest price bulk fusion check: ~" + myDEUS.itemList.get(testItemNum).getLowestItemCost());
 
-        System.out.println(myDEUS.itemList.get(55).getName());
-        System.out.println(myDEUS.itemList.get(55).getFusionList().size());
+        for (int i = myDEUS.getItemList().size()-1; i >= 0 ; i--){
+            Item item = myDEUS.getItemList().get(i);
+            item.calculateLowestCost();
+            item.unlock();
+        }
+        System.out.println("lowest price bulk fusion check: ~" + myDEUS.itemList.get(testItemNum).getLowestItemCost());
 
-        System.out.println(myDEUS.itemList.get(59).getName());
-        System.out.println(myDEUS.itemList.get(59).getFusionList().size());
+        for (int i = 0; i < myDEUS.getFusionList().size(); i++){
+            Fusion fusion = myDEUS.getFusionList().get(i);
+            fusion.getFusionCost();
+            for(Item item:myDEUS.getItemList()) {
+                item.unlock();
+            }
+        }
+        System.out.println("lowest price bulk fusion check: ~" + myDEUS.itemList.get(testItemNum).getLowestItemCost());
 
-        System.out.println(myDEUS.itemList.get(60).getName());
-        System.out.println(myDEUS.itemList.get(60).getFusionList().size());
-
-
-
+        for (int i = myDEUS.getFusionList().size()-1; i >= 0 ; i--){
+            Fusion fusion = myDEUS.getFusionList().get(i);
+            fusion.getFusionCost();
+            for(Item item:myDEUS.getItemList()) {
+                item.unlock();
+            }
+        }
+        System.out.println("lowest price bulk fusion check: ~" + myDEUS.itemList.get(testItemNum).getLowestItemCost());
     }
 
     public static void importGame(GameDEUS myGame) {
         myGame.fileReader();
-        printImport(myGame);
+//        printImport(myGame);
     }
 
     private static void printImport(GameDEUS myGame) {
@@ -67,9 +80,9 @@ public class ItemFusionStart {
 
     public static void printItemOverview(GameDEUS myGame, int testItemNum) {
         System.out.println();
-        System.out.println("Overview for nl.sogyo.jesper.itemfusion.Item: " + myGame.itemList.get(testItemNum).getName());
+        System.out.println("Overview for item: " + myGame.itemList.get(testItemNum).getName());
         System.out.println("Sold at " + myGame.itemList.get(testItemNum).getStoreList().size() + " store(s)");
-        System.out.println("nl.sogyo.jesper.itemfusion.Fusion possibilities: " + myGame.itemList.get(testItemNum).getFusionList().size());
+        System.out.println("Fusion possibilities: " + myGame.itemList.get(testItemNum).getFusionList().size());
         System.out.println();
 
         for (int i = 0; i < myGame.itemList.get(testItemNum).getStoreList().size(); i++) {

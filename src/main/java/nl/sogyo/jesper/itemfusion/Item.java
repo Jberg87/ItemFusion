@@ -14,10 +14,8 @@ public class Item {
 
     private boolean locked = false;
     private boolean bestBuyInStore = false;
-    int lowestItemCost = Integer.MAX_VALUE;
-    private Store lowestCostStore;
-    private Item lowestCostFusionA, lowestCostFusionB;
-    private int priceFusionItemA, fB;
+    int lowestItemCost = 999999;
+    private Store cheapestStore;
     private Fusion cheapestFusion;
     private int lowestPrice;
 
@@ -34,6 +32,8 @@ public class Item {
 
     public int calculateLowestCost() {
         locked = true;
+//        System.out.println(name + " is locked");
+
         int lowestCostStorePrice;
         int lowestFusionCost;
 
@@ -51,15 +51,19 @@ public class Item {
                 bestBuyInStore = false;
             }
         }
+//        locked = false;
+//        System.out.println("new lowest item cost (~" + lowestItemCost + ") for " + name );
+//        System.out.println(name + " is unlocked");
         return lowestItemCost;
     }
 
-
     public int getLowestFusionCost() {
-        int lowestFusionCost = Integer.MAX_VALUE;
+        int lowestFusionCost = 999999;
         for (Fusion fusion:fusionList) {
-            if (fusion.getLowestCost() < lowestFusionCost) {
-                lowestFusionCost = fusion.getLowestCost();
+            if (fusion.getItemA().isLocked() | fusion.getItemB().isLocked()) continue;
+            int fusionCost = fusion.getFusionCost();
+            if (fusionCost < lowestFusionCost) {
+                lowestFusionCost = fusionCost;
                 cheapestFusion = fusion;
             }
         }
@@ -67,22 +71,21 @@ public class Item {
     }
 
     public int getLowestStorePrice() {
-        int lowestStorePrice = Integer.MAX_VALUE;
-        for (int storePrice:storePricesList){
-            if (storePrice < lowestStorePrice ) lowestStorePrice = storePrice;
+        int lowestStorePrice = 999999;
+        for (int i=0; i < storePricesList.size(); i++){
+            if (storePricesList.get(i) < lowestStorePrice ) lowestStorePrice = storePricesList.get(i);
+            cheapestStore = storeList.get(i);
         }
         return lowestStorePrice;
     }
 
-    public void getBestOption() {
-        System.out.println();
-        System.out.println("Cheapest way to obtain  " + name + ":");
+    public int getBestOption() {
         if (bestBuyInStore) {
-            System.out.println(lowestCostStore.getName() + " ~ " + lowestItemCost);
+            System.out.println(name + " - " + cheapestStore.getName() + " ~ " + lowestItemCost);
+            return lowestItemCost;
         } else {
-            System.out.println(lowestCostFusionA.getName() + "  x  " + lowestCostFusionB.getName());
-            lowestCostFusionA.getBestOption();
-            lowestCostFusionB.getBestOption();
+//            System.out.println(cheapestFusion.getItemA().getName() + "  x  " + cheapestFusion.getItemB().getName());
+            return cheapestFusion.getItemA().getBestOption() + cheapestFusion.getItemB().getBestOption();
         }
     }
 
@@ -103,10 +106,10 @@ public class Item {
 
         } else {
             lineTemp = lineTemp + name + arrow;           // opbouwen line
-            lineTemp = lowestCostFusionA.printTreeBestOptionB(lineTemp);
+            lineTemp = cheapestFusion.getItemA().printTreeBestOptionB(lineTemp);
 
             lineTemp = stripLine(lineTemp);
-            lowestCostFusionB.printTreeBestOptionB(lineTemp);
+            cheapestFusion.getItemB().printTreeBestOptionB(lineTemp);
         }
         return lineTemp;
     }
@@ -205,8 +208,8 @@ public class Item {
         this.name = name.trim();
     }
 
-    public void addStoreAndPrice(Store storeSoldTemp, int price) {
-        storeList.add(storeSoldTemp);
+    public void addStoreAndPrice(Store store, int price) {
+        storeList.add(store);
         storePricesList.add(price);
     }
 
@@ -234,5 +237,9 @@ public class Item {
 
     public int getLowestPrice() {
         return lowestPrice;
+    }
+
+    public void unlock() {
+        locked=false;
     }
 }

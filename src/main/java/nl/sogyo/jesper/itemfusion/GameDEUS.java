@@ -12,6 +12,7 @@ public class GameDEUS {
 
     ArrayList<Store> storeList = new ArrayList<Store>();
     ArrayList<Item> itemList = new ArrayList<Item>();
+    ArrayList<Fusion> fusionList = new ArrayList<Fusion>();
 
     public void fileReader() {
         try {
@@ -23,10 +24,10 @@ public class GameDEUS {
                 if (lineTemp.contains(" Items:")) {
                     handleStoreLine(lineTemp);
                 }
-                else if (lineTemp.contains("~") && storeList.get(storeList.size()-1) != null) {
-                    handleItemLine(lineTemp, storeList.get(storeList.size() - 1));
+                else if (lineTemp.contains("~")) {
+                    handleItemLine(lineTemp);
                 }
-                else if (lineTemp.contains("=") && storeList.get(storeList.size()-1) != null) {
+                else if (lineTemp.contains("=")) {
                     handleFusionLine(lineTemp);
                 }
             }
@@ -37,7 +38,7 @@ public class GameDEUS {
 
 
     public File getFile() {
-        File fileComplete = new File("C:\\Users\\jvdberg\\Downloads\\nl.sogyo.jesper.itemfusion.Fusion.txt");
+        File fileComplete = new File("C:\\Users\\jvdberg\\Downloads\\Fusion.txt");
         System.out.println("File is loaded from :" + fileComplete.toString());
         return fileComplete;
     }
@@ -47,26 +48,25 @@ public class GameDEUS {
         storeList.add(new Store(lTSplit[0].trim()));
     }
 
-    public void handleItemLine(String lineTemp, Store storeTemp) {
-        if (lineTemp.contains("*")) {
-            Item itemTemp = new Item(storeTemp, readItemPrice(lineTemp), readItemName(lineTemp));
-            storeList.get(storeList.size()-1).addToInventory(itemTemp);
-            itemList.add(itemTemp);
+    public void handleItemLine(String lineTemp) {
+        Item item;
+        if (lineTemp.contains("*") | storeList.size() == 1) {
+            item = new Item(storeList.get(storeList.size()-1), readItemPrice(lineTemp), readItemName(lineTemp));
+            storeList.get(storeList.size()-1).addToInventory(item);
+            itemList.add(item);
         } else {
-            Item item = getItemByName(readItemName(lineTemp));
-//            if (item == null) System.out.println("handleItemLine(): item niet gevonden in lijst");
-            item.addStoreAndPrice(storeList.get(storeList.size()-1), readItemPrice(lineTemp));
+            item = getItemByName(readItemName(lineTemp));
+            item.addStoreAndPrice(storeList.get(storeList.size() - 1), readItemPrice(lineTemp));
             storeList.get(storeList.size()-1).addToInventory(item);
         }
+//        System.out.println(item.getName() + " is te koop in " + item.getStoreList().size() + " winkels");
     }
 
     private Item getItemByName(String name) {
-        for (int i = 0; i < itemList.size(); i++) {
-            if (name.equals(itemList.get(i))) return itemList.get(i);
+        for (Item item:itemList) {
+            if (name.equals(item.getName())) return item;
         }
-        Item newItem = new Item(name);
-        itemList.add(newItem);
-        return newItem;
+        return null;
     }
 
     public String readItemName(String lineTemp) {
@@ -84,11 +84,27 @@ public class GameDEUS {
     }
 
     public void handleFusionLine(String lineTemp) {
-        String[] lTSplit = lineTemp.split("=\\+");
-//        String[] lTSplitFusions = lTSplit[0].split("\\+");
-        Item fusionItemA = getItemByName(lTSplit[0].trim());
-        Item fusionItemB = getItemByName(lTSplit[1].trim());
-        Item resultItem = getItemByName(lTSplit[2].trim());
-        resultItem.addFusion(new Fusion(fusionItemA, fusionItemB));
+        String[] lineSplit = lineTemp.split("=");
+        String[] fusionItems = lineSplit[0].split("\\+");
+        Item fusionItemA = getItemByName(fusionItems[0].trim());
+        Item fusionItemB = getItemByName(fusionItems[1].trim());
+        Item resultItem = getItemByName(lineSplit[1].trim());
+        Fusion fusion = new Fusion(fusionItemA, fusionItemB);
+        fusionList.add(fusion);
+        if (resultItem == null) {
+            resultItem = new Item(lineSplit[1].trim());
+            resultItem.addFusion(fusion);
+            itemList.add(resultItem);
+        } else {
+            resultItem.addFusion(fusion);
+        }
+    }
+
+    public ArrayList<Fusion> getFusionList() {
+        return fusionList;
+    }
+
+    public ArrayList<Item> getItemList() {
+        return itemList;
     }
 }
